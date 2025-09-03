@@ -57,6 +57,7 @@ class _MyAppState extends State<MyApp> {
   List<TabData> tabs = [TabData()];
   int currentTabIndex = 0;
   bool showTabs = true;
+  bool showTitleBar = true;
   
   InAppWebViewSettings settings = InAppWebViewSettings(
       isInspectable: kDebugMode,
@@ -142,6 +143,12 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void toggleTitleBar() {
+    setState(() {
+      showTitleBar = !showTitleBar;
+    });
+  }
+
   bool handleKeyPress(KeyEvent event) {
     if (event is KeyDownEvent) {
       final isCtrl = event.logicalKey == LogicalKeyboardKey.controlLeft ||
@@ -172,13 +179,15 @@ class _MyAppState extends State<MyApp> {
         const SingleActivator(LogicalKeyboardKey.keyZ, control: true): goBack,
         const SingleActivator(LogicalKeyboardKey.keyR, control: true): refresh,
         const SingleActivator(LogicalKeyboardKey.keyT, control: true, shift: true): toggleTabs,
+        const SingleActivator(LogicalKeyboardKey.keyH, control: true): toggleTitleBar,
       },
       child: Focus(
         autofocus: true,
         child: Scaffold(
           body: Column(
             children: [
-              Container(
+              if (showTitleBar)
+                Container(
                 height: 30,
                 color: Colors.transparent,
                 child: Row(
