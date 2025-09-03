@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'theme.dart';
 
 WebViewEnvironment? webViewEnvironment;
 
@@ -24,7 +25,7 @@ Future main() async {
     await InAppWebViewController.setWebContentsDebuggingEnabled(kDebugMode);
   }
 
-  runApp(const MaterialApp(home: MyApp(), debugShowCheckedModeBanner: false));
+  runApp(MaterialApp(home: const MyApp(), debugShowCheckedModeBanner: false, theme: theme));
   
   doWhenWindowReady(() {
     const initialSize = Size(1200, 800);
@@ -55,6 +56,7 @@ class TabData {
 class _MyAppState extends State<MyApp> {
   List<TabData> tabs = [TabData()];
   int currentTabIndex = 0;
+  bool showTabs = true;
   
   InAppWebViewSettings settings = InAppWebViewSettings(
       isInspectable: kDebugMode,
@@ -134,6 +136,12 @@ class _MyAppState extends State<MyApp> {
     webViewController?.reload();
   }
 
+  void toggleTabs() {
+    setState(() {
+      showTabs = !showTabs;
+    });
+  }
+
   bool handleKeyPress(KeyEvent event) {
     if (event is KeyDownEvent) {
       final isCtrl = event.logicalKey == LogicalKeyboardKey.controlLeft ||
@@ -163,6 +171,7 @@ class _MyAppState extends State<MyApp> {
         const SingleActivator(LogicalKeyboardKey.keyT, control: true): createNewTab,
         const SingleActivator(LogicalKeyboardKey.keyZ, control: true): goBack,
         const SingleActivator(LogicalKeyboardKey.keyR, control: true): refresh,
+        const SingleActivator(LogicalKeyboardKey.keyT, control: true, shift: true): toggleTabs,
       },
       child: Focus(
         autofocus: true,
@@ -180,18 +189,12 @@ class _MyAppState extends State<MyApp> {
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Row(
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.arrow_back, size: 14),
-                                onPressed: () => webViewController?.goBack(),
-                                padding: const EdgeInsets.all(4),
-                                constraints: const BoxConstraints(),
-                              ),
                               Expanded(
                                 child: Container(
                                   height: 20,
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey.shade300),
+                                    border: Border.all(color: Theme.of(context).colorScheme.secondary),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: TextField(
@@ -213,12 +216,6 @@ class _MyAppState extends State<MyApp> {
                                   ),
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.refresh, size: 14),
-                                onPressed: () => webViewController?.reload(),
-                                padding: const EdgeInsets.all(4),
-                                constraints: const BoxConstraints(),
-                              ),
                             ],
                           ),
                         ),
@@ -234,10 +231,10 @@ class _MyAppState extends State<MyApp> {
                   ],
                 ),
               ),
-              if (tabs.length > 1)
+              if (tabs.length > 1 && showTabs)
                 Container(
                   height: 28,
-                  color: Colors.grey.shade100,
+                  color: Theme.of(context).colorScheme.primary,
                   child: Row(
                     children: [
                       ...tabs.asMap().entries.map((entry) {
@@ -248,9 +245,9 @@ class _MyAppState extends State<MyApp> {
                         return Container(
                           constraints: const BoxConstraints(maxWidth: 200),
                           decoration: BoxDecoration(
-                            color: isActive ? Colors.white : Colors.transparent,
+                            color: isActive ? Theme.of(context).colorScheme.surface : Colors.transparent,
                             border: Border(
-                              right: BorderSide(color: Colors.grey.shade300),
+                              right: BorderSide(color: Theme.of(context).colorScheme.secondary),
                             ),
                           ),
                           child: Row(
@@ -266,7 +263,7 @@ class _MyAppState extends State<MyApp> {
                                         (tab.url.length > 30 ? '${tab.url.substring(0, 30)}...' : tab.url),
                                       style: TextStyle(
                                         fontSize: 11,
-                                        color: isActive ? Colors.black : Colors.grey.shade600,
+                                        color: isActive ? Theme.of(context).textTheme.bodyLarge?.color : Colors.grey.shade600,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
